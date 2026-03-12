@@ -1,7 +1,6 @@
 {
-  "name": "solara-minecraft-wss-backend",
+  "name": "solara-backend",
   "version": "1.0.0",
-  "description": "Multiplayer backend with HTTP sync bypass",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
