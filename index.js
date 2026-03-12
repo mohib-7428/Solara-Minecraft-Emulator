@@ -2,15 +2,17 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-// Force CORS for everything
+// 1. MUST be at the very top. 
+// This sends the "permission" headers for EVERY request.
 app.use(cors()); 
+app.use(express.json());
 
 let players = {};
 
-// Using .all allows us to handle both GET and POST just in case
-app.all('/sync', (req, res) => {
-    // Check both query (GET) and body (POST)
-    const data = req.method === 'GET' ? req.query : req.body;
+// 2. We use app.use for /sync to catch ANY method (GET, POST, OPTIONS)
+app.use('/sync', (req, res) => {
+    // Check for data in both query (GET) and body (POST)
+    const data = (Object.keys(req.query).length > 0) ? req.query : req.body;
     const { id, x, y, z, r } = data;
 
     if (id) {
@@ -21,17 +23,18 @@ app.all('/sync', (req, res) => {
         };
     }
 
-    // Cleanup
+    // Cleanup inactive players
     const now = Date.now();
     Object.keys(players).forEach(pId => {
         if (now - players[pId].lastSeen > 10000) delete players[pId];
     });
 
-    res.json(players);
+    // Explicitly send a 200 status so the browser is happy
+    res.status(200).json(players);
 });
 
-// Add a root route so you don't see "Not Found" when visiting the main URL
-app.get('/', (req, res) => res.send("Server is Healthy"));
+// 3. Add a root route to verify the server is actually alive
+app.get('/', (req, res) => res.send("Minecraft Server is Live!"));
 
 const port = process.env.PORT || 8080;
 app.listen(port, "0.0.0.0", () => {
