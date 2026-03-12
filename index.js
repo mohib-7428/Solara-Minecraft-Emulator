@@ -2,26 +2,34 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-app.use(cors());
+// Enable CORS for your Netlify domain
+app.use(cors({ origin: "*" })); 
 app.use(express.json());
 
 let players = {};
 
-// Instead of WSS, we use a POST route
-app.post('/sync', (req, res) => {
-    const { id, pos, rot } = req.body;
-    if (id) {
-        players[id] = { pos, rot, lastSeen: Date.now() };
-    }
+// GET route: School filters almost never block standard GET requests
+app.get('/sync', (req, res) => {
+    const { id, x, y, z, r } = req.query;
     
-    // Clean up old players (inactive for 10 seconds)
-    const now = Date.now();
-    for (let pId in players) {
-        if (now - players[pId].lastSeen > 10000) delete players[pId];
+    if (id) {
+        players[id] = {
+            pos: { x: parseFloat(x), y: parseFloat(y), z: parseFloat(z) },
+            rot: parseFloat(r),
+            lastSeen: Date.now()
+        };
     }
 
-    res.json(players); 
+    // Remove inactive players (10 sec timeout)
+    const now = Date.now();
+    Object.keys(players).forEach(pId => {
+        if (now - players[pId].lastSeen > 10000) delete players[pId];
+    });
+
+    res.json(players);
 });
 
 const port = process.env.PORT || 8080;
-app.listen(port, () => console.log(`Bypass Server on port ${port}`));
+app.listen(port, "0.0.0.0", () => {
+    console.log(`Minecraft Bypass Server live on port ${port}`);
+});
