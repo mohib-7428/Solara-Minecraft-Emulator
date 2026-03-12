@@ -1,0 +1,12 @@
+{
+  "name": "solara-minecraft-wss-backend",
+  "version": "1.0.0",
+  "description": "Multiplayer backend for Solara Minecraft Emulator",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
